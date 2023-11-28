@@ -5,23 +5,21 @@ const API_BASE = 'https://graph.facebook.com/v15.0';
 
   // ===== MAKE POST ON PAGE =====
 async function getMatch(matches) {
-
-  // ===== GET USER'S PAGES =====
-  const pageResp = await fetch(`${API_BASE}/me/accounts?access_token=${userToken}`);
-
-  const pages = await pageResp.json();
-
-  // Assuming user has one page...
-  const page = pages.data[0];
-  const pageToken = page.access_token;
-  const pageId = page.id;
-
   for (const match of matches) {
     for (const item of match.matches) {
       if (Number(item.state_display) && Number(item.state_display) < 2) {
+        // ===== GET USER'S PAGES =====
+        const pageResp = await fetch(`${API_BASE}/me/accounts?access_token=${userToken}`);
+
+        const pages = await pageResp.json();
+
+        // Assuming user has one page...
+        const page = pages.data[0];
+        const pageToken = page.access_token;
+        const pageId = page.id;
         
         const fbPostObj = {
-          message: `🎌Match Started!🎌 \n\n💥⚽️💥 ${item.home_team.name} vs ${item.away_team.name} League: ${match.competition.name} 💥⚽️💥 \n\nWatch Now on SportScore: ${item.url} \n\n #${item.home_team.name.replace(/[^a-zA-Z]/g, "")} #${item.away_team.name.replace(/[^a-zA-Z]/g, "")} #${match.competition.name.replace(/[^a-zA-Z]/g, "")} ${item.venue.name ? '#' + item.venue.name.replace(/[^a-zA-Z]/g, "") : ''}`,
+          message: `🎌Match Started!🎌 \n\n💥⚽️💥 ${item.home_team.name} vs ${item.away_team.name} League: ${match.competition.name} 💥⚽️💥 \n\nWatch Now on SportScore: ${item.url} \n\n #${item.home_team.name.replace(/[^a-zA-Z]/g, "")} #${item.away_team.name.replace(/[^a-zA-Z]/g, "")} #${match.competition.name.replace(/[^a-zA-Z]/g, "")} ${item.venue ? '#' + item.venue.name.replace(/[^a-zA-Z]/g, "") : ''}`,
           link: item.social_picture,
         };
 
