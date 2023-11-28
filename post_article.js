@@ -18,10 +18,10 @@ async function getMatch(matches) {
 
   for (const match of matches) {
     for (const item of match.matches) {
-      if (Number(item.state_display) && Number(item.state_display) < 15) {
+      if (Number(item.state_display) && Number(item.state_display) < 2) {
         
         const fbPostObj = {
-          message: `🎌Match Started!🎌 \n\n💥⚽️💥 ${item.home_team.name} vs ${item.away_team.name} League: ${match.competition.name} 💥⚽️💥 \n\nWatch Now on SportScore: ${item.url} \n\n #${item.home_team.name.replace(/[^a-zA-Z]/g, "")} #${item.away_team.name.replace(/[^a-zA-Z]/g, "")}, #${match.competition.name.replace(/[^a-zA-Z]/g, "")} ${item.venue.name ? '#' + item.venue.name.replace(/[^a-zA-Z]/g, "") : ''}`,
+          message: `🎌Match Started!🎌 \n\n💥⚽️💥 ${item.home_team.name} vs ${item.away_team.name} League: ${match.competition.name} 💥⚽️💥 \n\nWatch Now on SportScore: ${item.url} \n\n #${item.home_team.name.replace(/[^a-zA-Z]/g, "")} #${item.away_team.name.replace(/[^a-zA-Z]/g, "")} #${match.competition.name.replace(/[^a-zA-Z]/g, "")} ${item.venue.name ? '#' + item.venue.name.replace(/[^a-zA-Z]/g, "") : ''}`,
           link: item.social_picture,
         };
 
@@ -57,7 +57,7 @@ function fetchData() {
     });
 }
 
-// start every 15 minute
-setInterval(fetchData, 900000);
+// start every 2 minute
+setInterval(fetchData, 120000);
 
 fetchData();
