@@ -1,6 +1,16 @@
 {
+  "name": "sportscorefacebook",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "post_article.js",
+  "scripts": {
+    "start": "node post_article.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
   "dependencies": {
-    "axios": "^1.6.2",
     "node-fetch": "^3.3.2"
   }
 }
