@@ -7,13 +7,10 @@ const API_BASE = 'https://graph.facebook.com/v15.0';
 async function getMatch(matches) {
   for (const match of matches) {
     for (const item of match.matches) {
-      console.log(item)
       if (Number(item.state_display) && Number(item.state_display) < 2) {
+        console.log(item.home_team.name)
         // ===== GET USER'S PAGES =====
-        console.log(item)
         const pageResp = await fetch(`${API_BASE}/me/accounts?access_token=${userToken}`);
-
-        console.log('page Response: ', pageResp)
         const pages = await pageResp.json();
 
         // Assuming user has one page...
@@ -43,6 +40,8 @@ async function getMatch(matches) {
       }
     }
   }
+
+  console.log('finish')
 }
 
 // get data from Sport Score
@@ -57,7 +56,6 @@ function fetchData() {
     })
     .then(response => response.json())
     .then(data => {
-        console.log(data.match_groups);
         getMatch(data.match_groups);
     })
     .catch(error => {
