@@ -7,7 +7,7 @@ const API_BASE = 'https://graph.facebook.com/v15.0';
 async function getMatch(matches) {
   for (const match of matches) {
     for (const item of match.matches) {
-      console.log(item.state_display, item.home_team);
+      console.log(item.state_display, item.home_team.name);
       if (Number(item.state_display) && Number(item.state_display) < 2) {
 
         console.log('After if:', item.state_display, item.home_team.name);
