@@ -66,6 +66,6 @@ function fetchData() {
 }
 
 // start every 2 minute
-setInterval(fetchData, 120000);
+setInterval(fetchData, 60000);
 
 fetchData();
