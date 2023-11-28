@@ -17,9 +17,14 @@ async function getMatch(matches) {
         const page = pages.data[0];
         const pageToken = page.access_token;
         const pageId = page.id;
+
+        const homeTeamName = item.home_team?.name || '';
+        const awayTeamName = item.away_team?.name || '';
+        const competitionName = match.competition?.name || '';
+        const venueName = item.venue?.name || '';
         
         const fbPostObj = {
-          message: `🎌Match Started!🎌 \n\n💥⚽️💥 ${item.home_team.name} vs ${item.away_team.name} League: ${match.competition.name} 💥⚽️💥 \n\nWatch Now on SportScore: ${item.url} \n\n #${item.home_team.name.replace(/[^a-zA-Z]/g, "")} #${item.away_team.name.replace(/[^a-zA-Z]/g, "")} #${match.competition.name.replace(/[^a-zA-Z]/g, "")} ${item.venue ? '#' + item.venue.name.replace(/[^a-zA-Z]/g, "") : ''}`,
+          message: `🎌Match Started!🎌 \n\n💥⚽️💥 ${homeTeamName} vs ${awayTeamName} League: ${competitionName} 💥⚽️💥 \n\nWatch Now on SportScore: ${item.url} \n\n #${homeTeamName.replace(/[^a-zA-Z]/g, "")} #${awayTeamName.replace(/[^a-zA-Z]/g, "")} #${competitionName.replace(/[^a-zA-Z]/g, "")} ${venueName ? '#' + venueName.replace(/[^a-zA-Z]/g, "") : ''}`,
           link: item.social_picture,
         };
 
