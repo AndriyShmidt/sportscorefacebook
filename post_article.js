@@ -4,18 +4,22 @@ import fs from 'fs';
 const tokenPath = './token.txt';
 const userToken = fs.readFileSync(tokenPath, 'utf8');
 
-// const userToken = 'EAAMBBQZCz47kBOwFXboyP0P3fn6QfOE2o0KODGjKQDPRVVal4JxfgNNBH0Q3nZB9OqGE4ZBQM6EiWAPG5dUvCOtCvKU4qBZCR0u0l9B38deZBvoRRpUfmCFnVRxwPl26Yu1iDiIeZBJdILZBLVFMBuJR6iIxJWtO2gAljZCd8UghdIYPjLuon6TrZBCzOAXK0Vqd2sjYqDPlD8sTMsPWEvbVGOHm3kRa4fZCb1LfMxmb1PWeBVY6pOHYXY7mAbNT29';
 const API_BASE = 'https://graph.facebook.com/v15.0';
 
   // ===== MAKE POST ON PAGE =====
 async function getMatch(matches) {
-  console.log(userToken);
   for (const match of matches) {
     for (const item of match.matches) {
       if (Number(item.state_display) && Number(item.state_display) < 2) {
 
         // ===== GET USER'S PAGES =====
-        const pageResp = await fetch(`${API_BASE}/me/accounts?access_token=${userToken}`);
+        let pageResp;
+
+        try {
+          pageResp = await fetch(`${API_BASE}/me/accounts?access_token=${userToken}`);
+        } catch (error) {
+          console.error("Виникла помилка у запиті:", error);
+        }
         const pages = await pageResp.json();
 
         // Assuming user has one page...

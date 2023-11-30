@@ -26,5 +26,7 @@ https://graph.facebook.com/v15.0/oauth/access_token?code={auth-code}&client_id={
 
     - copy "access_token"
 
-4. 
+4. cd sportscorefacebook
+pm2 stop post_article.js
+pm2 start post_article.js
 
