@@ -1,16 +1,19 @@
 import fetch from 'node-fetch';
+import fs from 'fs';
 
-const userToken = 'EAAMBBQZCz47kBO0gLV5ie20e3ly8BiHMqOj4gL5lo7jeaVaw0wZAOK4PqPBjJXzhQ55cS01BKXY0ZC9CJNI6Ci4c8hTOPJvulfgf5uNJRPApJ4effbZCzLSPXGZAfi5rbBSBtzbvOivZBNMZAU2fBGsZBY90Y9Llj0S3wJ4tBRhmOS3BMv7ZC7qt61CCOEZCklaKbZBqxR9tYZA7ADvbIw8OOexVWpashIkqFBX4HAfFl8DzByhA9fKjZARPhfBMg6auO';
+const tokenPath = './token.txt';
+const userToken = fs.readFileSync(tokenPath, 'utf8');
+
+// const userToken = 'EAAMBBQZCz47kBOwFXboyP0P3fn6QfOE2o0KODGjKQDPRVVal4JxfgNNBH0Q3nZB9OqGE4ZBQM6EiWAPG5dUvCOtCvKU4qBZCR0u0l9B38deZBvoRRpUfmCFnVRxwPl26Yu1iDiIeZBJdILZBLVFMBuJR6iIxJWtO2gAljZCd8UghdIYPjLuon6TrZBCzOAXK0Vqd2sjYqDPlD8sTMsPWEvbVGOHm3kRa4fZCb1LfMxmb1PWeBVY6pOHYXY7mAbNT29';
 const API_BASE = 'https://graph.facebook.com/v15.0';
 
   // ===== MAKE POST ON PAGE =====
 async function getMatch(matches) {
+  console.log(userToken);
   for (const match of matches) {
     for (const item of match.matches) {
-      console.log(item.state_display, item.home_team.name);
       if (Number(item.state_display) && Number(item.state_display) < 2) {
 
-        console.log('After if:', item.state_display, item.home_team.name);
         // ===== GET USER'S PAGES =====
         const pageResp = await fetch(`${API_BASE}/me/accounts?access_token=${userToken}`);
         const pages = await pageResp.json();
@@ -42,8 +45,6 @@ async function getMatch(matches) {
       }
     }
   }
-
-  console.log('finish')
 }
 
 // get data from Sport Score
