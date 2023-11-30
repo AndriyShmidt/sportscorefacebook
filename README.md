@@ -26,7 +26,13 @@ https://graph.facebook.com/v15.0/oauth/access_token?code={auth-code}&client_id={
 
     - copy "access_token"
 
-4. cd sportscorefacebook
-pm2 stop post_article.js
-pm2 start post_article.js
+4. Token replacement on the server
+
+    - open "Terminal"
+    - enter the command "ssh root@45.61.138.203"
+    - enter password "Ssgeli9988!@a"
+    - enter the command "cd sportscorefacebook"
+    - enter the command "pm2 stop post_article.js"
+    - enter the command "echo {your-new-token} > token.txt"
+    - enter the command "pm2 start post_article.js"
 
