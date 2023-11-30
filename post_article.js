@@ -34,7 +34,7 @@ async function getMatch(matches) {
         
         const fbPostObj = {
           message: `🎌Match Started!🎌 \n\n💥⚽️💥 ${homeTeamName} vs ${awayTeamName} League: ${competitionName} 💥⚽️💥 \n\nWatch Now on SportScore: ${item.url} \n\n #${homeTeamName.replace(/[^a-zA-Z]/g, "")} #${awayTeamName.replace(/[^a-zA-Z]/g, "")} #${competitionName.replace(/[^a-zA-Z]/g, "")} ${venueName ? '#' + venueName.replace(/[^a-zA-Z]/g, "") : ''}`,
-          link: item.social_picture,
+          link: item.url,
         };
 
         const postResp = await fetch(`${API_BASE}/${pageId}/feed?access_token=${pageToken}`, {
