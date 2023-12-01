@@ -45,49 +45,49 @@ async function getMatch(matches) {
         });
 
         const post = await postResp.json();
-
-        // Post on Instagram
-
-        const url = `https://graph.facebook.com/v13.0/17841462745627692/media`;
-        const instagramMessage = `🎌Match Started!🎌 \n\n💥⚽️💥 ${homeTeamName} vs ${awayTeamName} League: ${competitionName} 💥⚽️💥 \n\nWatch Now on SportScore: ${item.url} \n\n #${homeTeamName.replace(/[^a-zA-Z]/g, "")} #${awayTeamName.replace(/[^a-zA-Z]/g, "")} #${competitionName.replace(/[^a-zA-Z]/g, "")} ${venueName ? '#' + venueName.replace(/[^a-zA-Z]/g, "") : ''} \n\n ${item.url}`
-        
-        const mediaObjectParams = {
-          caption: instagramMessage,
-          access_token: accessToken
-        };
-
-        fetch(url, {
-            method: 'POST',
-            body: JSON.stringify(mediaObjectParams),
-            headers: { 'Content-Type': 'application/json' }
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Media Object created', data);
-
-            const mediaObjectId = data.id;
-
-            const publishUrl = `https://graph.facebook.com/v13.0/17841462745627692/media_publish`;
-
-            const publishParams = {
-                creation_id: mediaObjectId,
-                access_token: userToken
-            };
-
-            return fetch(publishUrl, {
-                method: 'POST',
-                body: JSON.stringify(publishParams),
-                headers: { 'Content-Type': 'application/json' }
-            });
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Media published', data);
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
       }
+
+      // Post on Instagram
+
+      const url = `https://graph.facebook.com/v13.0/17841462745627692/media`;
+      // const instagramMessage = `🎌Match Started!🎌 \n\n💥⚽️💥 ${homeTeamName} vs ${awayTeamName} League: ${competitionName} 💥⚽️💥 \n\nWatch Now on SportScore: ${item.url} \n\n #${homeTeamName.replace(/[^a-zA-Z]/g, "")} #${awayTeamName.replace(/[^a-zA-Z]/g, "")} #${competitionName.replace(/[^a-zA-Z]/g, "")} ${venueName ? '#' + venueName.replace(/[^a-zA-Z]/g, "") : ''} \n\n ${item.url}`
+      const instagramMessage = 'test'
+      const mediaObjectParams = {
+        caption: instagramMessage,
+        access_token: userToken
+      };
+
+      fetch(url, {
+          method: 'POST',
+          body: JSON.stringify(mediaObjectParams),
+          headers: { 'Content-Type': 'application/json' }
+      })
+      .then(response => response.json())
+      .then(data => {
+          console.log('Media Object created', data);
+
+          const mediaObjectId = data.id;
+
+          const publishUrl = `https://graph.facebook.com/v13.0/17841462745627692/media_publish`;
+
+          const publishParams = {
+              creation_id: mediaObjectId,
+              access_token: userToken
+          };
+
+          return fetch(publishUrl, {
+              method: 'POST',
+              body: JSON.stringify(publishParams),
+              headers: { 'Content-Type': 'application/json' }
+          });
+      })
+      .then(response => response.json())
+      .then(data => {
+          console.log('Media published', data);
+      })
+      .catch(error => {
+          console.error('Error:', error);
+      });
     }
   }
 }
