@@ -1,37 +1,6 @@
 import fetch from 'node-fetch';
 import fs from 'fs';
 
-//Format image
-function resizeImage(imageUrl, aspectRatio = 1.91) {
-  return new Promise((resolve, reject) => {
-      var img = new Image();
-      img.crossOrigin = 'Anonymous'; 
-      img.onload = function() {
-          var canvas = document.createElement('canvas');
-          var ctx = canvas.getContext('2d');
-
-          if (this.width > this.height * aspectRatio) {
-              canvas.width = this.height * aspectRatio;
-              canvas.height = this.height;
-          } else {
-              canvas.width = this.width;
-              canvas.height = this.width / aspectRatio;
-          }
-
-          ctx.drawImage(this, 0, 0, canvas.width, canvas.height);
-
-          var resizedImage = canvas.toDataURL('image/jpeg');
-          resolve(resizedImage); // Замість виводу в консоль, повертаємо URL
-      };
-
-      img.onerror = function() {
-          reject(new Error('Failed to load image'));
-      };
-
-      img.src = imageUrl;
-  });
-}
-
 const tokenPath = './token.txt';
 const userToken = fs.readFileSync(tokenPath, 'utf8');
 
@@ -77,58 +46,6 @@ async function getMatch(matches) {
 
         const post = await postResp.json();
       }
-
-      // Post on Instagram
-      const formatImage = '';
-      resizeImage(item.social_picture)
-        .then(resizedImageUrl => {
-          console.log('Resized image URL:', resizedImageUrl);
-          formatImage = resizedImageUrl
-        })
-        .catch(error => {
-          console.error('Error:', error);
-        });
-
-      const url = `https://graph.facebook.com/v13.0/17841462745627692/media`;
-      // const instagramMessage = `🎌Match Started!🎌 \n\n💥⚽️💥 ${homeTeamName} vs ${awayTeamName} League: ${competitionName} 💥⚽️💥 \n\nWatch Now on SportScore: ${item.url} \n\n #${homeTeamName.replace(/[^a-zA-Z]/g, "")} #${awayTeamName.replace(/[^a-zA-Z]/g, "")} #${competitionName.replace(/[^a-zA-Z]/g, "")} ${venueName ? '#' + venueName.replace(/[^a-zA-Z]/g, "") : ''} \n\n ${item.url}`
-      const instagramMessage = 'test'
-      const mediaObjectParams = {
-        image_url: formatImage,
-        caption: instagramMessage,
-        access_token: userToken
-      };
-
-      fetch(url, {
-          method: 'POST',
-          body: JSON.stringify(mediaObjectParams),
-          headers: { 'Content-Type': 'application/json' }
-      })
-      .then(response => response.json())
-      .then(data => {
-          console.log('Media Object created', data);
-
-          const mediaObjectId = data.id;
-
-          const publishUrl = `https://graph.facebook.com/v13.0/17841462745627692/media_publish`;
-
-          const publishParams = {
-              creation_id: mediaObjectId,
-              access_token: userToken
-          };
-
-          return fetch(publishUrl, {
-              method: 'POST',
-              body: JSON.stringify(publishParams),
-              headers: { 'Content-Type': 'application/json' }
-          });
-      })
-      .then(response => response.json())
-      .then(data => {
-          console.log('Media published', data);
-      })
-      .catch(error => {
-          console.error('Error:', error);
-      });
     }
   }
 }
@@ -156,4 +73,3 @@ function fetchData() {
 setInterval(fetchData, 60000);
 
 fetchData();
-
