@@ -53,6 +53,7 @@ async function getMatch(matches) {
       // const instagramMessage = `🎌Match Started!🎌 \n\n💥⚽️💥 ${homeTeamName} vs ${awayTeamName} League: ${competitionName} 💥⚽️💥 \n\nWatch Now on SportScore: ${item.url} \n\n #${homeTeamName.replace(/[^a-zA-Z]/g, "")} #${awayTeamName.replace(/[^a-zA-Z]/g, "")} #${competitionName.replace(/[^a-zA-Z]/g, "")} ${venueName ? '#' + venueName.replace(/[^a-zA-Z]/g, "") : ''} \n\n ${item.url}`
       const instagramMessage = 'test'
       const mediaObjectParams = {
+        image_url: item.social_picture,
         caption: instagramMessage,
         access_token: userToken
       };
