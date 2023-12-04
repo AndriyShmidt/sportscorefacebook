@@ -1,6 +1,5 @@
 import fetch from 'node-fetch';
 import fs from 'fs';
-import sharp from 'sharp';
 
 const tokenPath = './token.txt';
 const userToken = fs.readFileSync(tokenPath, 'utf8');
@@ -68,6 +67,8 @@ async function getMatch(matches) {
           }
 
           const instagramDate = await instagramResponse.json();
+
+          console.log(instagramDate)
 
           await fetch(`https://graph.facebook.com/v18.0/17841462745627692/media_publish?creation_id=${Number(instagramDate.id)}&access_token=${userToken}`, {
             method: 'POST',
