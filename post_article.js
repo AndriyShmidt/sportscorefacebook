@@ -5,6 +5,7 @@ const tokenPath = './token.txt';
 const userToken = fs.readFileSync(tokenPath, 'utf8');
 
 const API_BASE = 'https://graph.facebook.com/v18.0';
+let countOfPosts = 0;
 
   // ===== MAKE POST ON PAGE =====
 async function getMatch(matches) {
@@ -13,6 +14,7 @@ async function getMatch(matches) {
       if (Number(item.state_display) && Number(item.state_display) < 2) {
 
         // Post on Facebook
+        console.log('start facebook post')
         let pageResp;
 
         try {
@@ -45,6 +47,37 @@ async function getMatch(matches) {
         });
 
         const post = await postResp.json();
+
+        console.log('end facebook post')
+
+        //Create instagram post
+        if (countOfPosts < 50) {
+          console.log('start instagram post')
+
+          const instagramMessage = `🎌Match Started!🎌 \n\n💥⚽️💥 ${homeTeamName} vs ${awayTeamName} League: ${competitionName} 💥⚽️💥 \n\nWatch Now on SportScore: ${item.url} \n\n #${homeTeamName.replace(/[^a-zA-Z]/g, "")} #${awayTeamName.replace(/[^a-zA-Z]/g, "")} #${competitionName.replace(/[^a-zA-Z]/g, "")} ${venueName ? '#' + venueName.replace(/[^a-zA-Z]/g, "") : ''}`; 
+          let instagramResponse;
+
+          try {
+            instagramResponse = await fetch(`https://graph.facebook.com/v18.0/17841462745627692/media?image_url=${item.social_picture}&caption=${encodeURIComponent(instagramMessage)}&access_token=${userToken}`, {
+                method: 'POST',
+            });
+          } catch (error) {
+            console.error('Error:', error);
+          }
+
+          const instagramDate = await response.json();
+
+          await fetch(`https://graph.facebook.com/v18.0/17841462745627692/media_publish?creation_id=${instagramDate.id}&access_token=${userToken}`, {
+            method: 'POST',
+          })
+          .then(response => response.json())
+          .then(data => console.log(data))
+          .catch((error) => console.error('Error:', error));
+
+          console.log('end instagram post')
+        }
+
+        countOfPosts++;
       }
     }
   }
@@ -68,7 +101,12 @@ function fetchData() {
     });
 }
 
+function resetCount() {
+  countOfPosts = 0;
+}
+
 // start every 2 minute
 setInterval(fetchData, 60000);
+setInterval(resetCount, 86400000)
 
 fetchData();
