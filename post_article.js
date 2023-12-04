@@ -23,7 +23,7 @@ function resizeImageForInstagram(url, callback) {
 async function getMatch(matches) {
   for (const match of matches) {
     for (const item of match.matches) {
-      if (Number(item.state_display) && Number(item.state_display) < 20) {
+      if (Number(item.state_display) && Number(item.state_display) < 30) {
 
         // Post on Facebook
         console.log('start facebook post')
