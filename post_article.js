@@ -8,24 +8,11 @@ const userToken = fs.readFileSync(tokenPath, 'utf8');
 const API_BASE = 'https://graph.facebook.com/v18.0';
 let countOfPosts = 0;
 
-
-// change image size for instagram posts
-
-function resizeImageForInstagram(url) {
-  return new Promise((resolve, reject) => {
-    sharp(url)
-      .resize({ width: 1080, height: 1080, fit: 'cover' })
-      .toBuffer()
-      .then(buffer => resolve(buffer.toString('base64')))
-      .catch(err => reject(err));
-  });
-}
-
 // ===== MAKE POST ON PAGE =====
 async function getMatch(matches) {
   for (const match of matches) {
     for (const item of match.matches) {
-      if (Number(item.state_display) && Number(item.state_display) < 50) {
+      if (Number(item.state_display) && Number(item.state_display) < 2) {
 
         // Post on Facebook
         console.log('start facebook post')
@@ -69,18 +56,11 @@ async function getMatch(matches) {
           console.log('start instagram post')
           let imageForInstagramPost;
 
-          try {
-            imageForInstagramPost = await resizeImageForInstagram(item.social_picture);
-            console.log(imageForInstagramPost)
-          } catch (error) {
-            console.error('Error resizing image:', error);
-          }
-
           const instagramMessage = `🎌Match Started!🎌 \n\n💥⚽️💥 ${homeTeamName} vs ${awayTeamName} League: ${competitionName} 💥⚽️💥 \n\nWatch Now on SportScore: ${item.url} \n\n #${homeTeamName.replace(/[^a-zA-Z]/g, "")} #${awayTeamName.replace(/[^a-zA-Z]/g, "")} #${competitionName.replace(/[^a-zA-Z]/g, "")} ${venueName ? '#' + venueName.replace(/[^a-zA-Z]/g, "") : ''}`; 
           let instagramResponse;
 
           try {
-            instagramResponse = await fetch(`https://graph.facebook.com/v18.0/17841462745627692/media?image_url=${imageForInstagramPost}&caption=${encodeURIComponent(instagramMessage)}&access_token=${userToken}`, {
+            instagramResponse = await fetch(`https://graph.facebook.com/v18.0/17841462745627692/media?image_url=https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSllMk_iDYl-KakgVRw3Pw3RoBnS2OvBVi-N9W0NV8swXS-KKMd&caption=${encodeURIComponent(instagramMessage)}&access_token=${userToken}`, {
                 method: 'POST',
             });
           } catch (error) {
@@ -88,9 +68,6 @@ async function getMatch(matches) {
           }
 
           const instagramDate = await instagramResponse.json();
-
-          console.log(`https://graph.facebook.com/v18.0/17841462745627692/media?image_url=${imageForInstagramPost}&caption=${encodeURIComponent(instagramMessage)}&access_token=${userToken}`)
-          console.log(instagramDate);
 
           await fetch(`https://graph.facebook.com/v18.0/17841462745627692/media_publish?creation_id=${Number(instagramDate.id)}&access_token=${userToken}`, {
             method: 'POST',
