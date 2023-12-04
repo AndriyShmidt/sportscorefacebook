@@ -23,7 +23,7 @@ function resizeImageForInstagram(url, callback) {
 async function getMatch(matches) {
   for (const match of matches) {
     for (const item of match.matches) {
-      if (Number(item.state_display) && Number(item.state_display) < 2) {
+      if (Number(item.state_display) && Number(item.state_display) < 20) {
 
         // Post on Facebook
         console.log('start facebook post')
@@ -88,7 +88,7 @@ async function getMatch(matches) {
           console.log(`https://graph.facebook.com/v18.0/17841462745627692/media?image_url=${imageForInstagramPost}&caption=${encodeURIComponent(instagramMessage)}&access_token=${userToken}`)
           console.log(instagramDate);
 
-          await fetch(`https://graph.facebook.com/v18.0/17841462745627692/media_publish?creation_id=${instagramDate.id}&access_token=${userToken}`, {
+          await fetch(`https://graph.facebook.com/v18.0/17841462745627692/media_publish?creation_id=${Number(instagramDate.id)}&access_token=${userToken}`, {
             method: 'POST',
           })
           .then(response => response.json())
