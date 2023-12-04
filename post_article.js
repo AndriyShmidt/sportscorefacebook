@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import fs from 'fs';
-const sharp = require('sharp');
+import sharp from 'sharp';
 
 const tokenPath = './token.txt';
 const userToken = fs.readFileSync(tokenPath, 'utf8');
@@ -18,7 +18,6 @@ function resizeImageForInstagram(url, callback) {
       .then(buffer => callback(buffer.toString('base64')))
       .catch(err => console.error(err));
 }
-
 
 // ===== MAKE POST ON PAGE =====
 async function getMatch(matches) {
