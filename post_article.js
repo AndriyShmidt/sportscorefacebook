@@ -7,7 +7,38 @@ const userToken = fs.readFileSync(tokenPath, 'utf8');
 const API_BASE = 'https://graph.facebook.com/v18.0';
 let countOfPosts = 0;
 
-  // ===== MAKE POST ON PAGE =====
+
+// change image size for instagram posts
+
+function resizeImageForInstagram(url, callback) {
+  var img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = function() {
+      // Цільове співвідношення сторін для Instagram
+      var targetAspectRatio = 1;  // для квадратного зображення, наприклад
+
+      var canvas = document.createElement('canvas');
+      var ctx = canvas.getContext('2d');
+
+      if (img.width > img.height) {
+          // Для широких зображень
+          canvas.width = img.height * targetAspectRatio;
+          canvas.height = img.height;
+          ctx.drawImage(img, (img.width - img.height) / 2, 0, img.height, img.height, 0, 0, canvas.width, canvas.height);
+      } else {
+          // Для високих зображень
+          canvas.width = img.width;
+          canvas.height = img.width / targetAspectRatio;
+          ctx.drawImage(img, 0, (img.height - img.width) / 2, img.width, img.width, 0, 0, canvas.width, canvas.height);
+      }
+
+      callback(canvas.toDataURL());
+  };
+  img.src = url;
+}
+
+
+// ===== MAKE POST ON PAGE =====
 async function getMatch(matches) {
   for (const match of matches) {
     for (const item of match.matches) {
@@ -53,12 +84,16 @@ async function getMatch(matches) {
         //Create instagram post
         if (countOfPosts < 50) {
           console.log('start instagram post')
+          let imageForInstagramPost;
+          resizeImageForInstagram(item.social_picture, function(dataUrl) {
+            imageForInstagramPost = dataUrl;
+          });
 
           const instagramMessage = `🎌Match Started!🎌 \n\n💥⚽️💥 ${homeTeamName} vs ${awayTeamName} League: ${competitionName} 💥⚽️💥 \n\nWatch Now on SportScore: ${item.url} \n\n #${homeTeamName.replace(/[^a-zA-Z]/g, "")} #${awayTeamName.replace(/[^a-zA-Z]/g, "")} #${competitionName.replace(/[^a-zA-Z]/g, "")} ${venueName ? '#' + venueName.replace(/[^a-zA-Z]/g, "") : ''}`; 
           let instagramResponse;
 
           try {
-            instagramResponse = await fetch(`https://graph.facebook.com/v18.0/17841462745627692/media?image_url=${item.social_picture}&caption=${encodeURIComponent(instagramMessage)}&access_token=${userToken}`, {
+            instagramResponse = await fetch(`https://graph.facebook.com/v18.0/17841462745627692/media?image_url=${imageForInstagramPost}&caption=${encodeURIComponent(instagramMessage)}&access_token=${userToken}`, {
                 method: 'POST',
             });
           } catch (error) {
@@ -67,7 +102,7 @@ async function getMatch(matches) {
 
           const instagramDate = await instagramResponse.json();
 
-          console.log(`https://graph.facebook.com/v18.0/17841462745627692/media?image_url=${item.social_picture}&caption=${encodeURIComponent(instagramMessage)}&access_token=${userToken}`)
+          console.log(`https://graph.facebook.com/v18.0/17841462745627692/media?image_url=${imageForInstagramPost}&caption=${encodeURIComponent(instagramMessage)}&access_token=${userToken}`)
           console.log(instagramDate);
 
           await fetch(`https://graph.facebook.com/v18.0/17841462745627692/media_publish?creation_id=${instagramDate.id}&access_token=${userToken}`, {
