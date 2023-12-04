@@ -10,7 +10,8 @@ pass: Ssgeli9988!@
 
     - client_id={app-id}: Your app’s ID from the app dashboard.
 
-https://www.facebook.com/v15.0/dialog/oauth?response_type=code%20granted_scopes&client_id={App-ID}&redirect_uri=https%3A%2F%2Fsportscore.io%2F&scope=pages_manage_posts&state=12345
+https://www.facebook.com/v15.0/dialog/oauth?response_type=code%20granted_scopes&client_id={YOUR-CLIENT-ID}&redirect_uri=https%3A%2F%2Fsportscore.io%2F&scope=pages_show_list,business_management,instagram_basic,instagram_content_publish,pages_read_engagement,pages_manage_posts,public_profile&state=12345
+
 
     - click "Reconect";
     - click "Got it";

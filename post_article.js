@@ -4,7 +4,7 @@ import fs from 'fs';
 const tokenPath = './token.txt';
 const userToken = fs.readFileSync(tokenPath, 'utf8');
 
-const API_BASE = 'https://graph.facebook.com/v15.0';
+const API_BASE = 'https://graph.facebook.com/v18.0';
 
   // ===== MAKE POST ON PAGE =====
 async function getMatch(matches) {
@@ -52,7 +52,6 @@ async function getMatch(matches) {
 
 // get data from Sport Score
 function fetchData() {
-  console.log('start fetching data');
     fetch('https://sportscore.io/api/v1/football/matches/?match_status=live&sort_by_time=false&page=0', {
         method: 'GET',
         headers: {
