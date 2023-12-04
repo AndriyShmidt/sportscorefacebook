@@ -65,7 +65,7 @@ async function getMatch(matches) {
             console.error('Error:', error);
           }
 
-          const instagramDate = await response.json();
+          const instagramDate = await instagramResponse.json();
 
           await fetch(`https://graph.facebook.com/v18.0/17841462745627692/media_publish?creation_id=${instagramDate.id}&access_token=${userToken}`, {
             method: 'POST',
