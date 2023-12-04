@@ -1,5 +1,6 @@
 import fetch from 'node-fetch';
 import fs from 'fs';
+const sharp = require('sharp');
 
 const tokenPath = './token.txt';
 const userToken = fs.readFileSync(tokenPath, 'utf8');
@@ -11,30 +12,11 @@ let countOfPosts = 0;
 // change image size for instagram posts
 
 function resizeImageForInstagram(url, callback) {
-  var img = new Image();
-  img.crossOrigin = 'anonymous';
-  img.onload = function() {
-      // Цільове співвідношення сторін для Instagram
-      var targetAspectRatio = 1;  // для квадратного зображення, наприклад
-
-      var canvas = document.createElement('canvas');
-      var ctx = canvas.getContext('2d');
-
-      if (img.width > img.height) {
-          // Для широких зображень
-          canvas.width = img.height * targetAspectRatio;
-          canvas.height = img.height;
-          ctx.drawImage(img, (img.width - img.height) / 2, 0, img.height, img.height, 0, 0, canvas.width, canvas.height);
-      } else {
-          // Для високих зображень
-          canvas.width = img.width;
-          canvas.height = img.width / targetAspectRatio;
-          ctx.drawImage(img, 0, (img.height - img.width) / 2, img.width, img.width, 0, 0, canvas.width, canvas.height);
-      }
-
-      callback(canvas.toDataURL());
-  };
-  img.src = url;
+  sharp(url)
+      .resize({ width: 1080, height: 1080, fit: 'cover' })
+      .toBuffer()
+      .then(buffer => callback(buffer.toString('base64')))
+      .catch(err => console.error(err));
 }
 
 
