@@ -1,5 +1,7 @@
 import fetch from 'node-fetch';
 import fs from 'fs';
+import axios from 'axios';
+import sharp from 'sharp';
 
 const tokenPath = './token.txt';
 const userToken = fs.readFileSync(tokenPath, 'utf8');
@@ -7,6 +9,7 @@ const userToken = fs.readFileSync(tokenPath, 'utf8');
 const API_BASE = 'https://graph.facebook.com/v15.0';
 let countOfPosts = 0;
 
+// Post on Facebook 
 async function postOnFacebook(item, match) {
   console.log('start facebook post');
   let pageResp;
@@ -44,7 +47,29 @@ async function postOnFacebook(item, match) {
   console.log('end facebook post');
 }
 
-async function postOnInstagram(item, match) {
+//Convert Image
+async function convertAndSendImage(item, match) {
+  try {
+      // get in WEBP
+      const response = await axios.get(item.social_picture, { responseType: 'arraybuffer' });
+      const webpData = response.data;
+
+      // convert to JPEG
+      const jpegData = await sharp(webpData)
+          .toFormat('jpeg')
+          .toBuffer();
+
+      // send image to API
+      await postOnInstagram(item, match, jpegData);
+
+      console.log(jpegData);
+  } catch (error) {
+      console.error(error);
+  }
+}
+
+//Post on Instagram
+async function postOnInstagram(item, match, convertImg) {
   console.log('start instagram post');
   const homeTeamName = item.home_team?.name || '';
   const awayTeamName = item.away_team?.name || '';
@@ -55,7 +80,7 @@ async function postOnInstagram(item, match) {
   let instagramResponse;
 
   try {
-    instagramResponse = await fetch(`https://graph.facebook.com/v18.0/17841462745627692/media?image_url=https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSllMk_iDYl-KakgVRw3Pw3RoBnS2OvBVi-N9W0NV8swXS-KKMd&caption=${encodeURIComponent(instagramMessage)}&access_token=${userToken}`, {
+    instagramResponse = await fetch(`https://graph.facebook.com/v18.0/17841462745627692/media?image_url=${convertImg}&caption=${encodeURIComponent(instagramMessage)}&access_token=${userToken}`, {
       method: 'POST',
     });
   } catch (error) {
@@ -80,7 +105,7 @@ async function processItem(item, match) {
   if (Number(item.state_display) && Number(item.state_display) < 2) {
       await postOnFacebook(item, match);
       if (countOfPosts < 50) {
-          await postOnInstagram(item, match);
+          await convertAndSendImage(item, match);
           countOfPosts++;
       }
   }
