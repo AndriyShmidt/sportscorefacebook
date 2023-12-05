@@ -11,41 +11,45 @@ async function postOnFacebook(item, match) {
   console.log('start facebook post');
   let pageResp;
 
-        try {
-          pageResp = await fetch(`${API_BASE}/me/accounts?access_token=${userToken}`);
-        } catch (error) {
-          console.error("Виникла помилка у запиті:", error);
-        }
-        const pages = await pageResp.json();
+  try {
+    pageResp = await fetch(`${API_BASE}/me/accounts?access_token=${userToken}`);
+  } catch (error) {
+    console.error("Виникла помилка у запиті:", error);
+  }
+  const pages = await pageResp.json();
 
-        const page = pages.data[0];
-        const pageToken = page.access_token;
-        const pageId = page.id;
+  const page = pages.data[0];
+  const pageToken = page.access_token;
+  const pageId = page.id;
 
-        const homeTeamName = item.home_team?.name || '';
-        const awayTeamName = item.away_team?.name || '';
-        const competitionName = match.competition?.name || '';
-        const venueName = item.venue?.name || '';
+  const homeTeamName = item.home_team?.name || '';
+  const awayTeamName = item.away_team?.name || '';
+  const competitionName = match.competition?.name || '';
+  const venueName = item.venue?.name || '';
 
-        const fbPostObj = {
-          message: `🎌Match Started!🎌 \n\n💥⚽️💥 ${homeTeamName} vs ${awayTeamName} League: ${competitionName} 💥⚽️💥 \n\nWatch Now on SportScore: ${item.url} \n\n #${homeTeamName.replace(/[^a-zA-Z]/g, "")} #${awayTeamName.replace(/[^a-zA-Z]/g, "")} #${competitionName.replace(/[^a-zA-Z]/g, "")} ${venueName ? '#' + venueName.replace(/[^a-zA-Z]/g, "") : ''}`,
-          link: item.url,
-        };
+  const fbPostObj = {
+    message: `🎌Match Started!🎌 \n\n💥⚽️💥 ${homeTeamName} vs ${awayTeamName} League: ${competitionName} 💥⚽️💥 \n\nWatch Now on SportScore: ${item.url} \n\n #${homeTeamName.replace(/[^a-zA-Z]/g, "")} #${awayTeamName.replace(/[^a-zA-Z]/g, "")} #${competitionName.replace(/[^a-zA-Z]/g, "")} ${venueName ? '#' + venueName.replace(/[^a-zA-Z]/g, "") : ''}`,
+    link: item.url,
+  };
 
-        const postResp = await fetch(`${API_BASE}/${pageId}/feed?access_token=${pageToken}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(fbPostObj)
-        });
+  const postResp = await fetch(`${API_BASE}/${pageId}/feed?access_token=${pageToken}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(fbPostObj)
+  });
 
-        const post = await postResp.json();
+  const post = await postResp.json();
   console.log('end facebook post');
 }
 
 async function postOnInstagram(item, match) {
   console.log('start instagram post');
+  const homeTeamName = item.home_team?.name || '';
+  const awayTeamName = item.away_team?.name || '';
+  const competitionName = match.competition?.name || '';
+  const venueName = item.venue?.name || '';
 
   const instagramMessage = `🎌Match Started!🎌 \n\n💥⚽️💥 ${homeTeamName} vs ${awayTeamName} League: ${competitionName} 💥⚽️💥 \n\nWatch Now on SportScore: ${item.url} \n\n #${homeTeamName.replace(/[^a-zA-Z]/g, "")} #${awayTeamName.replace(/[^a-zA-Z]/g, "")} #${competitionName.replace(/[^a-zA-Z]/g, "")} ${venueName ? '#' + venueName.replace(/[^a-zA-Z]/g, "") : ''}`; 
   let instagramResponse;
