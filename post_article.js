@@ -7,15 +7,9 @@ const userToken = fs.readFileSync(tokenPath, 'utf8');
 const API_BASE = 'https://graph.facebook.com/v18.0';
 let countOfPosts = 0;
 
-// ===== MAKE POST ON PAGE =====
-async function getMatch(matches) {
-  for (const match of matches) {
-    for (const item of match.matches) {
-      if (Number(item.state_display) && Number(item.state_display) < 2) {
-
-        // Post on Facebook
-        console.log('start facebook post')
-        let pageResp;
+async function postOnFacebook(item, match) {
+  console.log('start facebook post');
+  let pageResp;
 
         try {
           pageResp = await fetch(`${API_BASE}/me/accounts?access_token=${userToken}`);
@@ -47,42 +41,53 @@ async function getMatch(matches) {
         });
 
         const post = await postResp.json();
+  console.log('end facebook post');
+}
 
-        console.log('end facebook post')
+async function postOnInstagram(item, match) {
+  console.log('start instagram post');
 
-        //Create instagram post
-        if (countOfPosts < 50) {
-          console.log('start instagram post')
-          let imageForInstagramPost;
+  const instagramMessage = `🎌Match Started!🎌 \n\n💥⚽️💥 ${homeTeamName} vs ${awayTeamName} League: ${competitionName} 💥⚽️💥 \n\nWatch Now on SportScore: ${item.url} \n\n #${homeTeamName.replace(/[^a-zA-Z]/g, "")} #${awayTeamName.replace(/[^a-zA-Z]/g, "")} #${competitionName.replace(/[^a-zA-Z]/g, "")} ${venueName ? '#' + venueName.replace(/[^a-zA-Z]/g, "") : ''}`; 
+  let instagramResponse;
 
-          const instagramMessage = `🎌Match Started!🎌 \n\n💥⚽️💥 ${homeTeamName} vs ${awayTeamName} League: ${competitionName} 💥⚽️💥 \n\nWatch Now on SportScore: ${item.url} \n\n #${homeTeamName.replace(/[^a-zA-Z]/g, "")} #${awayTeamName.replace(/[^a-zA-Z]/g, "")} #${competitionName.replace(/[^a-zA-Z]/g, "")} ${venueName ? '#' + venueName.replace(/[^a-zA-Z]/g, "") : ''}`; 
-          let instagramResponse;
+  try {
+    instagramResponse = await fetch(`https://graph.facebook.com/v18.0/17841462745627692/media?image_url=https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSllMk_iDYl-KakgVRw3Pw3RoBnS2OvBVi-N9W0NV8swXS-KKMd&caption=${encodeURIComponent(instagramMessage)}&access_token=${userToken}`, {
+      method: 'POST',
+    });
+  } catch (error) {
+    console.error('Error:', error);
+  }
 
-          try {
-            instagramResponse = await fetch(`https://graph.facebook.com/v18.0/17841462745627692/media?image_url=https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSllMk_iDYl-KakgVRw3Pw3RoBnS2OvBVi-N9W0NV8swXS-KKMd&caption=${encodeURIComponent(instagramMessage)}&access_token=${userToken}`, {
-                method: 'POST',
-            });
-          } catch (error) {
-            console.error('Error:', error);
-          }
+  const instagramDate = await instagramResponse.json();
 
-          const instagramDate = await instagramResponse.json();
+  console.log(instagramDate)
 
-          console.log(instagramDate)
+  await fetch(`https://graph.facebook.com/v18.0/17841462745627692/media_publish?creation_id=${Number(instagramDate.id)}&access_token=${userToken}`, {
+    method: 'POST',
+  })
+  .then(response => response.json())
+  .then(data => console.log(data))
+  .catch((error) => console.error('Error:', error));
 
-          await fetch(`https://graph.facebook.com/v18.0/17841462745627692/media_publish?creation_id=${Number(instagramDate.id)}&access_token=${userToken}`, {
-            method: 'POST',
-          })
-          .then(response => response.json())
-          .then(data => console.log(data))
-          .catch((error) => console.error('Error:', error));
+  console.log('end instagram post');
+}
 
-          console.log('end instagram post')
-        }
-
-        countOfPosts++;
+async function processItem(item, match) {
+  if (Number(item.state_display) && Number(item.state_display) < 2) {
+      await postOnFacebook(item, match);
+      if (countOfPosts < 50) {
+          await postOnInstagram(item, match);
+          countOfPosts++;
       }
-    }
+  }
+}
+
+// ===== MAKE POST ON PAGE =====
+async function getMatch(matches) {
+  for (const match of matches) {
+      for (const item of match.matches) {
+          await processItem(item, match);
+      }
   }
 }
 
