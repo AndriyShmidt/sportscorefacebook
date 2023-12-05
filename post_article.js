@@ -4,7 +4,7 @@ import fs from 'fs';
 const tokenPath = './token.txt';
 const userToken = fs.readFileSync(tokenPath, 'utf8');
 
-const API_BASE = 'https://graph.facebook.com/v18.0';
+const API_BASE = 'https://graph.facebook.com/v15.0';
 let countOfPosts = 0;
 
 async function postOnFacebook(item, match) {
