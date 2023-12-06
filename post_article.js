@@ -79,10 +79,7 @@ async function postOnInstagram(item, match) {
 async function processItem(item, match) {
   if (Number(item.state_display) && Number(item.state_display) < 2) {
       await postOnFacebook(item, match);
-      if (countOfPosts < 50) {
-          await postOnInstagram(item, match);
-          countOfPosts++;
-      }
+      await postOnInstagram(item, match);
   }
 }
 
@@ -113,12 +110,24 @@ function fetchData() {
     });
 }
 
-function resetCount() {
-  countOfPosts = 0;
-}
-
-// start every 2 minute
+// start every 1 minute
 setInterval(fetchData, 60000);
-setInterval(resetCount, 86400000)
 
 fetchData();
+
+
+async function convertAndSendImage(imageUrl) {
+    try {
+        const response = await axios({
+            method: 'get',
+            url: imageUrl,
+            responseType: 'arraybuffer'
+        });
+
+        const convertedImage = await sharp(response.data)
+            .jpeg()
+            .toBuffer();
+    } catch (error) {
+        console.error('Error in converting or sending the image:', error);
+    }
+  }
