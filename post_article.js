@@ -46,7 +46,7 @@ async function postOnFacebook(item, match) {
   try {
     pageResp = await fetch(`${API_BASE}/me/accounts?access_token=${userToken}`);
   } catch (error) {
-    console.error("Виникла помилка у запиті:", error);
+    console.error(error);
   }
   const pages = await pageResp.json();
 
