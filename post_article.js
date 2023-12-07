@@ -1,12 +1,44 @@
 import fetch from 'node-fetch';
 import fs from 'fs';
+import express from 'express';
+import multer from 'multer';
+import path from 'path';
+import axios from 'axios';
+import sharp from 'sharp';
+import FormData from 'form-data';
 
 const tokenPath = './token.txt';
 const userToken = fs.readFileSync(tokenPath, 'utf8');
-
 const API_BASE = 'https://graph.facebook.com/v15.0';
-let countOfPosts = 0;
 
+
+//Create server
+const app = express();
+const port = 3000; 
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/')
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname))
+  }
+});
+
+const upload = multer({ storage: storage });
+
+app.use('/uploads', express.static('uploads'));
+
+app.post('/upload', upload.single('image'), (req, res) => {
+  const filePath = `/uploads/${req.file.filename}`;
+  res.send({ filePath });
+});
+
+app.listen(port, () => {
+  console.log(`http://localhost:${port}`);
+});
+
+//Post on facebook
 async function postOnFacebook(item, match) {
   console.log('start facebook post');
   let pageResp;
@@ -14,7 +46,7 @@ async function postOnFacebook(item, match) {
   try {
     pageResp = await fetch(`${API_BASE}/me/accounts?access_token=${userToken}`);
   } catch (error) {
-    console.error("Виникла помилка у запиті:", error);
+    console.error(error);
   }
   const pages = await pageResp.json();
 
@@ -44,8 +76,42 @@ async function postOnFacebook(item, match) {
   console.log('end facebook post');
 }
 
+//Convert image to jpeg
+async function convertAndSendImage(imageUrl) {
+  try {
+      const response = await axios({
+          method: 'get',
+          url: imageUrl,
+          responseType: 'arraybuffer'
+      });
+
+      const convertedImage = await sharp(response.data)
+          .jpeg()
+          .toBuffer();
+
+      const form = new FormData();
+      form.append('image', convertedImage, { filename: 'temp-converted-image.jpg' });
+
+      const uploadResponse = await axios.post('http://localhost:3000/upload', form, {
+          headers: {
+              ...form.getHeaders(),
+          },
+      });
+
+      return uploadResponse.data;
+  } catch (error) {
+      console.error('Error in converting or sending the image:', error);
+  }
+}
+
+//Create instagram post
 async function postOnInstagram(item, match) {
   console.log('start instagram post');
+  const convertedImageResponse = await convertAndSendImage(item.social_picture);
+  const myConvertedImagePath = convertedImageResponse.filePath;
+
+  console.log(myConvertedImagePath);
+
   const homeTeamName = item.home_team?.name || '';
   const awayTeamName = item.away_team?.name || '';
   const competitionName = match.competition?.name || '';
@@ -55,7 +121,7 @@ async function postOnInstagram(item, match) {
   let instagramResponse;
 
   try {
-    instagramResponse = await fetch(`https://graph.facebook.com/v18.0/17841462745627692/media?image_url=https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSllMk_iDYl-KakgVRw3Pw3RoBnS2OvBVi-N9W0NV8swXS-KKMd&caption=${encodeURIComponent(instagramMessage)}&access_token=${userToken}`, {
+    instagramResponse = await fetch(`https://graph.facebook.com/v18.0/17841462745627692/media?image_url=${myConvertedImagePath}&caption=${encodeURIComponent(instagramMessage)}&access_token=${userToken}`, {
       method: 'POST',
     });
   } catch (error) {
@@ -76,6 +142,7 @@ async function postOnInstagram(item, match) {
   console.log('end instagram post');
 }
 
+//Start post facebook and instagram
 async function processItem(item, match) {
   if (Number(item.state_display) && Number(item.state_display) < 2) {
       await postOnFacebook(item, match);
@@ -114,20 +181,3 @@ function fetchData() {
 setInterval(fetchData, 60000);
 
 fetchData();
-
-
-async function convertAndSendImage(imageUrl) {
-    try {
-        const response = await axios({
-            method: 'get',
-            url: imageUrl,
-            responseType: 'arraybuffer'
-        });
-
-        const convertedImage = await sharp(response.data)
-            .jpeg()
-            .toBuffer();
-    } catch (error) {
-        console.error('Error in converting or sending the image:', error);
-    }
-  }
