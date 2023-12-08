@@ -76,9 +76,26 @@ async function postOnFacebook(item, match) {
   console.log('end facebook post');
 }
 
+//Clear uploads folder
+
+async function clearUploadsFolder() {
+  const directory = 'uploads/';
+
+  fs.readdir(directory, (err, files) => {
+    if (err) throw err;
+
+    for (const file of files) {
+      fs.unlink(path.join(directory, file), err => {
+        if (err) throw err;
+      });
+    }
+  });
+}
+
 //Convert image to jpeg
 async function convertAndSendImage(imageUrl) {
   try {
+      await clearUploadsFolder();
       const response = await axios({
           method: 'get',
           url: imageUrl,
@@ -118,8 +135,6 @@ async function postOnInstagram(item, match) {
   const convertedImageResponse = await convertAndSendImage(item.social_picture);
   const myConvertedImagePath = convertedImageResponse.filePath;
 
-  console.log(myConvertedImagePath);
-
   const homeTeamName = item.home_team?.name || '';
   const awayTeamName = item.away_team?.name || '';
   const competitionName = match.competition?.name || '';
@@ -129,7 +144,7 @@ async function postOnInstagram(item, match) {
   let instagramResponse;
 
   try {
-    instagramResponse = await fetch(`https://graph.facebook.com/v18.0/17841462745627692/media?image_url=http://45.61.138.203${myConvertedImagePath}&caption=${encodeURIComponent(instagramMessage)}&access_token=${userToken}`, {
+    instagramResponse = await fetch(`https://graph.facebook.com/v15.0/17841462745627692/media?image_url=http://45.61.138.203${myConvertedImagePath}&caption=${encodeURIComponent(instagramMessage)}&access_token=${userToken}`, {
       method: 'POST',
     });
   } catch (error) {
@@ -140,7 +155,7 @@ async function postOnInstagram(item, match) {
 
   console.log(instagramDate)
 
-  await fetch(`https://graph.facebook.com/v18.0/17841462745627692/media_publish?creation_id=${Number(instagramDate.id)}&access_token=${userToken}`, {
+  await fetch(`https://graph.facebook.com/v15.0/17841462745627692/media_publish?creation_id=${Number(instagramDate.id)}&access_token=${userToken}`, {
     method: 'POST',
   })
   .then(response => response.json())
