@@ -121,7 +121,7 @@ async function postOnInstagram(item, match) {
   let instagramResponse;
 
   try {
-    instagramResponse = await fetch(`https://graph.facebook.com/v18.0/17841462745627692/media?image_url=http://http://45.61.138.203${myConvertedImagePath}&caption=${encodeURIComponent(instagramMessage)}&access_token=${userToken}`, {
+    instagramResponse = await fetch(`https://graph.facebook.com/v18.0/17841462745627692/media?image_url=http://45.61.138.203${myConvertedImagePath}&caption=${encodeURIComponent(instagramMessage)}&access_token=${userToken}`, {
       method: 'POST',
     });
   } catch (error) {
