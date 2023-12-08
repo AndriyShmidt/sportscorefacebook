@@ -14,7 +14,7 @@ const API_BASE = 'https://graph.facebook.com/v15.0';
 
 //Create server
 const app = express();
-const port = 80; 
+const port = 3000; 
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
