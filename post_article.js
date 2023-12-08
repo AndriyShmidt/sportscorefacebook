@@ -154,6 +154,7 @@ async function postOnInstagram(item, match) {
   const instagramDate = await instagramResponse.json();
 
   console.log(instagramDate)
+  console.log(Number(instagramDate.id))
 
   await fetch(`https://graph.facebook.com/v15.0/17841462745627692/media_publish?creation_id=${Number(instagramDate.id)}&access_token=${userToken}`, {
     method: 'POST',
@@ -162,6 +163,8 @@ async function postOnInstagram(item, match) {
   .then(data => console.log(data))
   .catch((error) => console.error('Error:', error));
 
+  console.log(instagramDate)
+  console.log(Number(instagramDate.id))
   console.log('end instagram post');
 }
 
