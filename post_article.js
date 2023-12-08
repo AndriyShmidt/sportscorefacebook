@@ -85,9 +85,17 @@ async function convertAndSendImage(imageUrl) {
           responseType: 'arraybuffer'
       });
 
-      const convertedImage = await sharp(response.data)
-          .jpeg()
-          .toBuffer();
+      let image = sharp(response.data);
+      
+      const metadata = await image.metadata();
+      
+      image = image.resize({
+          width: metadata.width,
+          height: Math.floor(metadata.width / 1.91),
+          fit: 'cover'
+      });
+
+      const convertedImage = await image.jpeg().toBuffer();
 
       const form = new FormData();
       form.append('image', convertedImage, { filename: 'temp-converted-image.jpg' });
