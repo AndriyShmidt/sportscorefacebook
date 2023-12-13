@@ -30,7 +30,7 @@ const upload = multer({ storage: storage });
 app.use('/uploads', express.static('uploads'));
 
 app.post('/upload', upload.single('image'), (req, res) => {
-  const filePath = `/uploads/${req.file.filename}`;
+  const filePath = `/uploads/facebook/${req.file.filename}`;
   res.send({ filePath });
 });
 
@@ -79,7 +79,7 @@ async function postOnFacebook(item, match) {
 //Clear uploads folder
 
 async function clearUploadsFolder() {
-  const directory = 'uploads/';
+  const directory = 'uploads/facebook/';
 
   fs.readdir(directory, (err, files) => {
     if (err) throw err;
