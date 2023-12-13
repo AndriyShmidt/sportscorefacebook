@@ -18,7 +18,7 @@ const port = 3000;
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/')
+    cb(null, 'uploads/facebook/')
   },
   filename: (req, file, cb) => {
     cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname))
@@ -27,7 +27,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads/facebook', express.static('uploads/facebook'));
 
 app.post('/upload', upload.single('image'), (req, res) => {
   const filePath = `/uploads/facebook/${req.file.filename}`;
