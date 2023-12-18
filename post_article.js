@@ -143,8 +143,6 @@ async function postOnInstagram(item, match) {
   const instagramMessage = `🎌Match Started!🎌 \n\n💥⚽️💥 ${homeTeamName} vs ${awayTeamName} League: ${competitionName} 💥⚽️💥 \n\nWatch Now on SportScore: ${item.url} \n\n #${homeTeamName.replace(/[^a-zA-Z]/g, "")} #${awayTeamName.replace(/[^a-zA-Z]/g, "")} #${competitionName.replace(/[^a-zA-Z]/g, "")} ${venueName ? '#' + venueName.replace(/[^a-zA-Z]/g, "") : ''}`; 
   let instagramResponse;
 
-  console.log(myConvertedImagePath)
-
   try {
     instagramResponse = await fetch(`https://graph.facebook.com/v15.0/17841462745627692/media?image_url=http://45.61.138.203${myConvertedImagePath}&caption=${encodeURIComponent(instagramMessage)}&access_token=${userToken}`, {
       method: 'POST',
@@ -155,9 +153,6 @@ async function postOnInstagram(item, match) {
 
   const instagramDate = await instagramResponse.json();
 
-  console.log(instagramDate)
-  console.log(instagramDate.id)
-
   await fetch(`https://graph.facebook.com/v15.0/17841462745627692/media_publish?creation_id=${instagramDate.id}&access_token=${userToken}`, {
     method: 'POST',
   })
@@ -165,8 +160,6 @@ async function postOnInstagram(item, match) {
   .then(data => console.log(data))
   .catch((error) => console.error('Error:', error));
 
-  console.log(instagramDate)
-  console.log(Number(instagramDate.id))
   console.log('end instagram post');
 }
 
