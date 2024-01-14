@@ -24,7 +24,6 @@ async function fetchAutopost(social) {
   })
   .then(response => response.json())
   .then(data => {
-      console.log(data)
       if (social = 'facebook') {
         autopostDataFacebook = data;
       } else if (social = 'instagram') {
@@ -211,6 +210,8 @@ async function processItem(item, match, facebookAutopost, instagramAutopost) {
 async function getMatch(matches) {
   await fetchAutopost('facebook');
   await fetchAutopost('instagram');
+  console.log(autopostDataFacebook)
+  console.log(autopostDataInstagram)
   for (const match of matches) {
       for (const item of match.matches) {
           await processItem(item, match, autopostDataFacebook[0].enabled, autopostDataInstagram[0].enabled);
