@@ -10,6 +10,31 @@ import FormData from 'form-data';
 const tokenPath = './token.txt';
 const userToken = fs.readFileSync(tokenPath, 'utf8');
 const API_BASE = 'https://graph.facebook.com/v15.0';
+let autopostDataFacebook;
+let autopostDataInstagram;
+
+//get autopost is on or off
+async function fetchAutopost(social) {
+  fetch(`https://sportscore.io/api/v1/autopost/settings/${social}/`, {
+      method: 'GET',
+      headers: {
+          "accept": "application/json",
+          'X-API-Key': 'uqzmebqojezbivd2dmpakmj93j7gjm',
+      },
+  })
+  .then(response => response.json())
+  .then(data => {
+      if (social = 'facebook') {
+        autopostDataFacebook = data;
+      } else if (social = 'instagram') {
+        autopostDataInstagram = data;
+      }
+      
+  })
+  .catch(error => {
+      console.error('Error:', error);
+  });
+}
 
 
 //Create server
@@ -164,18 +189,30 @@ async function postOnInstagram(item, match) {
 }
 
 //Start post facebook and instagram
-async function processItem(item, match) {
-  if (Number(item.state_display) && Number(item.state_display) < 2) {
+async function processItem(item, match, facebookAutopost, instagramAutopost) {
+  console.log(facebookAutopost);
+  console.log(instagramAutopost)
+  if (facebookAutopost) {
+    if (Number(item.state_display) && Number(item.state_display) < 2) {
       await postOnFacebook(item, match);
-      await postOnInstagram(item, match);
+    }
   }
+
+  if (instagramAutopost) {
+    if (Number(item.state_display) && Number(item.state_display) < 2) {
+      await postOnInstagram(item, match);
+    }
+  }
+  
 }
 
 // ===== MAKE POST ON PAGE =====
 async function getMatch(matches) {
+  await fetchAutopost('facebook');
+  await fetchAutopost('instagram');
   for (const match of matches) {
       for (const item of match.matches) {
-          await processItem(item, match);
+          await processItem(item, match, autopostDataFacebook[0].enabled, autopostDataInstagram[0].enabled);
       }
   }
 }
