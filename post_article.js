@@ -24,6 +24,7 @@ async function fetchAutopost(social) {
   })
   .then(response => response.json())
   .then(data => {
+      console.log(data)
       if (social = 'facebook') {
         autopostDataFacebook = data;
       } else if (social = 'instagram') {
