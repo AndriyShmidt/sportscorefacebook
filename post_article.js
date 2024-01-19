@@ -25,9 +25,9 @@ async function fetchAutopost(social) {
   .then(response => response.json())
   .then(data => {
       if (social == 'facebook') {
-        autopostDataFacebook = data;
+        autopostDataFacebook = data.some(obj => obj.enabled === true);
       } else if (social == 'instagram') {
-        autopostDataInstagram = data;
+        autopostDataInstagram = data.some(obj => obj.enabled === true);
       }
       
   })
@@ -190,8 +190,6 @@ async function postOnInstagram(item, match) {
 
 //Start post facebook and instagram
 async function processItem(item, match, facebookAutopost, instagramAutopost) {
-  console.log(facebookAutopost);
-  console.log(instagramAutopost)
   if (facebookAutopost) {
     if (Number(item.state_display) && Number(item.state_display) < 2) {
       await postOnFacebook(item, match);
@@ -214,7 +212,7 @@ async function getMatch(matches) {
   console.log(autopostDataInstagram)
   for (const match of matches) {
       for (const item of match.matches) {
-          await processItem(item, match, autopostDataFacebook[0].enabled, autopostDataInstagram[0].enabled);
+          await processItem(item, match, autopostDataFacebook, autopostDataInstagram);
       }
   }
 }
