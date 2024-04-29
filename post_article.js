@@ -190,6 +190,9 @@ async function postOnInstagram(item, match) {
 
 //Start post facebook and instagram
 async function processItem(item, match, facebookAutopost, instagramAutopost) {
+
+  await new Promise(resolve => setTimeout(resolve, 20000));
+
   if (facebookAutopost) {
     if (Number(item.state_display) && Number(item.state_display) < 2) {
       await postOnFacebook(item, match);
@@ -201,15 +204,13 @@ async function processItem(item, match, facebookAutopost, instagramAutopost) {
       await postOnInstagram(item, match);
     }
   }
-  
 }
 
 // ===== MAKE POST ON PAGE =====
 async function getMatch(matches) {
   await fetchAutopost('facebook');
   await fetchAutopost('instagram');
-  console.log(autopostDataFacebook)
-  console.log(autopostDataInstagram)
+  
   for (const match of matches) {
       for (const item of match.matches) {
           await processItem(item, match, autopostDataFacebook, autopostDataInstagram);
