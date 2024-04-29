@@ -74,7 +74,7 @@ async function postOnFacebook(item, match) {
       throw new Error('Failed to retrieve Facebook page details');
     }
     const pages = await pageResp.json();
-    
+
     const page = pages.data[0];
     const pageToken = page.access_token;
     const pageId = page.id;
@@ -98,6 +98,7 @@ async function postOnFacebook(item, match) {
     });
 
     const post = await postResp.json();
+    console.log(post)
     console.log('end facebook post');
   } catch (error) {
     console.error('Facebook posting error:', error);
