@@ -70,35 +70,38 @@ async function postOnFacebook(item, match) {
 
   try {
     pageResp = await fetch(`${API_BASE}/me/accounts?access_token=${userToken}`);
+    if (!pageResp.ok) {
+      throw new Error('Failed to retrieve Facebook page details');
+    }
+    const pages = await pageResp.json();
+    
+    const page = pages.data[0];
+    const pageToken = page.access_token;
+    const pageId = page.id;
+
+    const homeTeamName = item.home_team?.name || '';
+    const awayTeamName = item.away_team?.name || '';
+    const competitionName = match.competition?.name || '';
+    const venueName = item.venue?.name || '';
+
+    const fbPostObj = {
+      message: `🎌Match Started!🎌 \n\n💥⚽️💥 ${homeTeamName} vs ${awayTeamName} League: ${competitionName} 💥⚽️💥 \n\nWatch Now on SportScore: ${item.url} \n\n #${homeTeamName.replace(/[^a-zA-Z]/g, "")} #${awayTeamName.replace(/[^a-zA-Z]/g, "")} #${competitionName.replace(/[^a-zA-Z]/g, "")} ${venueName ? '#' + venueName.replace(/[^a-zA-Z]/g, "") : ''}`,
+      link: item.url,
+    };
+
+    const postResp = await fetch(`${API_BASE}/${pageId}/feed?access_token=${pageToken}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(fbPostObj)
+    });
+
+    const post = await postResp.json();
+    console.log('end facebook post');
   } catch (error) {
-    console.error(error);
+    console.error('Facebook posting error:', error);
   }
-  const pages = await pageResp.json();
-
-  const page = pages.data[0];
-  const pageToken = page.access_token;
-  const pageId = page.id;
-
-  const homeTeamName = item.home_team?.name || '';
-  const awayTeamName = item.away_team?.name || '';
-  const competitionName = match.competition?.name || '';
-  const venueName = item.venue?.name || '';
-
-  const fbPostObj = {
-    message: `🎌Match Started!🎌 \n\n💥⚽️💥 ${homeTeamName} vs ${awayTeamName} League: ${competitionName} 💥⚽️💥 \n\nWatch Now on SportScore: ${item.url} \n\n #${homeTeamName.replace(/[^a-zA-Z]/g, "")} #${awayTeamName.replace(/[^a-zA-Z]/g, "")} #${competitionName.replace(/[^a-zA-Z]/g, "")} ${venueName ? '#' + venueName.replace(/[^a-zA-Z]/g, "") : ''}`,
-    link: item.url,
-  };
-
-  const postResp = await fetch(`${API_BASE}/${pageId}/feed?access_token=${pageToken}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(fbPostObj)
-  });
-
-  const post = await postResp.json();
-  console.log('end facebook post');
 }
 
 //Clear uploads folder
