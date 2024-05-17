@@ -203,6 +203,8 @@ async function processItem(item, match, facebookAutopost, instagramAutopost) {
     }
   }
 
+  console.log(instagramAutopost);
+
   if (instagramAutopost) {
     if (Number(item.state_display) && Number(item.state_display) < 2) {
       await postOnInstagram(item, match);
