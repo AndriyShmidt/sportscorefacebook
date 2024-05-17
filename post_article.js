@@ -10,6 +10,31 @@ import FormData from 'form-data';
 const tokenPath = './token.txt';
 const userToken = fs.readFileSync(tokenPath, 'utf8');
 const API_BASE = 'https://graph.facebook.com/v15.0';
+let autopostDataFacebook;
+let autopostDataInstagram;
+
+//get autopost is on or off
+async function fetchAutopost(social) {
+  fetch(`https://sportscore.io/api/v1/autopost/settings/${social}/`, {
+      method: 'GET',
+      headers: {
+          "accept": "application/json",
+          'X-API-Key': 'uqzmebqojezbivd2dmpakmj93j7gjm',
+      },
+  })
+  .then(response => response.json())
+  .then(data => {
+      if (social == 'facebook') {
+        autopostDataFacebook = data.some(obj => obj.enabled === true);
+      } else if (social == 'instagram') {
+        autopostDataInstagram = data.some(obj => obj.enabled === true);
+      }
+      
+  })
+  .catch(error => {
+      console.error('Error:', error);
+  });
+}
 
 
 //Create server
@@ -18,7 +43,7 @@ const port = 3000;
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/')
+    cb(null, 'uploads/facebook/')
   },
   filename: (req, file, cb) => {
     cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname))
@@ -27,10 +52,10 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads/facebook', express.static('uploads/facebook'));
 
 app.post('/upload', upload.single('image'), (req, res) => {
-  const filePath = `/uploads/${req.file.filename}`;
+  const filePath = `/uploads/facebook/${req.file.filename}`;
   res.send({ filePath });
 });
 
@@ -45,49 +70,78 @@ async function postOnFacebook(item, match) {
 
   try {
     pageResp = await fetch(`${API_BASE}/me/accounts?access_token=${userToken}`);
+    if (!pageResp.ok) {
+      throw new Error('Failed to retrieve Facebook page details');
+    }
+    const pages = await pageResp.json();
+
+    const page = pages.data[0];
+    const pageToken = page.access_token;
+    const pageId = page.id;
+
+    const homeTeamName = item.home_team?.name || '';
+    const awayTeamName = item.away_team?.name || '';
+    const competitionName = match.competition?.name || '';
+    const venueName = item.venue?.name || '';
+
+    const fbPostObj = {
+      message: `🎌Match Started!🎌 \n\n💥⚽️💥 ${homeTeamName} vs ${awayTeamName} League: ${competitionName} 💥⚽️💥 \n\nWatch Now on SportScore: ${item.url} \n\n #${homeTeamName.replace(/[^a-zA-Z]/g, "")} #${awayTeamName.replace(/[^a-zA-Z]/g, "")} #${competitionName.replace(/[^a-zA-Z]/g, "")} ${venueName ? '#' + venueName.replace(/[^a-zA-Z]/g, "") : ''}`,
+      link: item.url,
+    };
+
+    const postResp = await fetch(`${API_BASE}/${pageId}/feed?access_token=${pageToken}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(fbPostObj)
+    });
+
+    const post = await postResp.json();
+    console.log(post)
+    console.log('end facebook post');
   } catch (error) {
-    console.error(error);
+    console.error('Facebook posting error:', error);
   }
-  const pages = await pageResp.json();
+}
 
-  const page = pages.data[0];
-  const pageToken = page.access_token;
-  const pageId = page.id;
+//Clear uploads folder
 
-  const homeTeamName = item.home_team?.name || '';
-  const awayTeamName = item.away_team?.name || '';
-  const competitionName = match.competition?.name || '';
-  const venueName = item.venue?.name || '';
+async function clearUploadsFolder() {
+  const directory = 'uploads/facebook/';
 
-  const fbPostObj = {
-    message: `🎌Match Started!🎌 \n\n💥⚽️💥 ${homeTeamName} vs ${awayTeamName} League: ${competitionName} 💥⚽️💥 \n\nWatch Now on SportScore: ${item.url} \n\n #${homeTeamName.replace(/[^a-zA-Z]/g, "")} #${awayTeamName.replace(/[^a-zA-Z]/g, "")} #${competitionName.replace(/[^a-zA-Z]/g, "")} ${venueName ? '#' + venueName.replace(/[^a-zA-Z]/g, "") : ''}`,
-    link: item.url,
-  };
+  fs.readdir(directory, (err, files) => {
+    if (err) throw err;
 
-  const postResp = await fetch(`${API_BASE}/${pageId}/feed?access_token=${pageToken}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(fbPostObj)
+    for (const file of files) {
+      fs.unlink(path.join(directory, file), err => {
+        if (err) throw err;
+      });
+    }
   });
-
-  const post = await postResp.json();
-  console.log('end facebook post');
 }
 
 //Convert image to jpeg
 async function convertAndSendImage(imageUrl) {
   try {
+      await clearUploadsFolder();
       const response = await axios({
           method: 'get',
           url: imageUrl,
           responseType: 'arraybuffer'
       });
 
-      const convertedImage = await sharp(response.data)
-          .jpeg()
-          .toBuffer();
+      let image = sharp(response.data);
+      
+      const metadata = await image.metadata();
+      
+      image = image.resize({
+          width: metadata.width,
+          height: Math.floor(metadata.width / 1.91),
+          fit: 'cover'
+      });
+
+      const convertedImage = await image.jpeg().toBuffer();
 
       const form = new FormData();
       form.append('image', convertedImage, { filename: 'temp-converted-image.jpg' });
@@ -110,18 +164,16 @@ async function postOnInstagram(item, match) {
   const convertedImageResponse = await convertAndSendImage(item.social_picture);
   const myConvertedImagePath = convertedImageResponse.filePath;
 
-  console.log(myConvertedImagePath);
-
   const homeTeamName = item.home_team?.name || '';
   const awayTeamName = item.away_team?.name || '';
   const competitionName = match.competition?.name || '';
   const venueName = item.venue?.name || '';
 
-  const instagramMessage = `🎌Match Started!🎌 \n\n💥⚽️💥 ${homeTeamName} vs ${awayTeamName} League: ${competitionName} 💥⚽️💥 \n\nWatch Now on SportScore: ${item.url} \n\n #${homeTeamName.replace(/[^a-zA-Z]/g, "")} #${awayTeamName.replace(/[^a-zA-Z]/g, "")} #${competitionName.replace(/[^a-zA-Z]/g, "")} ${venueName ? '#' + venueName.replace(/[^a-zA-Z]/g, "") : ''}`; 
+  const instagramMessage = `🎌Match Started!🎌 \n\n${homeTeamName} vs ${awayTeamName} \n\n${item.url} \n\n #${homeTeamName.replace(/[^a-zA-Z]/g, "")} #${awayTeamName.replace(/[^a-zA-Z]/g, "")} #${competitionName.replace(/[^a-zA-Z]/g, "")} ${venueName ? '#' + venueName.replace(/[^a-zA-Z]/g, "") : ''}`; 
   let instagramResponse;
 
   try {
-    instagramResponse = await fetch(`https://graph.facebook.com/v18.0/17841462745627692/media?image_url=${myConvertedImagePath}&caption=${encodeURIComponent(instagramMessage)}&access_token=${userToken}`, {
+    instagramResponse = await fetch(`https://graph.facebook.com/v15.0/17841462745627692/media?image_url=http://45.61.138.203${myConvertedImagePath}&caption=${encodeURIComponent(instagramMessage)}&access_token=${userToken}`, {
       method: 'POST',
     });
   } catch (error) {
@@ -130,9 +182,7 @@ async function postOnInstagram(item, match) {
 
   const instagramDate = await instagramResponse.json();
 
-  console.log(instagramDate)
-
-  await fetch(`https://graph.facebook.com/v18.0/17841462745627692/media_publish?creation_id=${Number(instagramDate.id)}&access_token=${userToken}`, {
+  await fetch(`https://graph.facebook.com/v15.0/17841462745627692/media_publish?creation_id=${instagramDate.id}&access_token=${userToken}`, {
     method: 'POST',
   })
   .then(response => response.json())
@@ -143,18 +193,31 @@ async function postOnInstagram(item, match) {
 }
 
 //Start post facebook and instagram
-async function processItem(item, match) {
-  if (Number(item.state_display) && Number(item.state_display) < 2) {
+async function processItem(item, match, facebookAutopost, instagramAutopost) {
+
+  await new Promise(resolve => setTimeout(resolve, 20000));
+
+  if (facebookAutopost) {
+    if (Number(item.state_display) && Number(item.state_display) < 2) {
       await postOnFacebook(item, match);
+    }
+  }
+
+  if (instagramAutopost) {
+    if (Number(item.state_display) && Number(item.state_display) < 2) {
       await postOnInstagram(item, match);
+    }
   }
 }
 
 // ===== MAKE POST ON PAGE =====
 async function getMatch(matches) {
+  await fetchAutopost('facebook');
+  await fetchAutopost('instagram');
+  
   for (const match of matches) {
       for (const item of match.matches) {
-          await processItem(item, match);
+          await processItem(item, match, autopostDataFacebook, autopostDataInstagram);
       }
   }
 }
