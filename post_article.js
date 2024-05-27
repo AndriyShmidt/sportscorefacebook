@@ -13,6 +13,57 @@ const API_BASE = 'https://graph.facebook.com/v15.0';
 let autopostDataFacebook;
 let autopostDataInstagram;
 
+async function getCsrfToken() {
+  return client.get('https://sportscore.io/api/v1/blog/?page=0', {
+    headers: {
+        "accept": "application/json",
+        'X-API-Key': 'uqzmebqojezbivd2dmpakmj93j7gjm',
+    },
+    }).then(response => {
+        const csrfToken = jar.getCookiesSync('https://sportscore.io').find(cookie => cookie.key === 'csrftoken')?.value;
+        console.log('CSRF Token:', csrfToken);
+        return csrfToken;
+    }).catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+//log error to admin panel
+async function postStatus(socialMedia, ErrorMessage) {
+  const url = 'https://sportscore.io/api/v1/autopost/status/';
+  const csrfToken = await getCsrfToken();
+  const data = {
+    bot: 1,
+    type: 1,
+    title: socialMedia,
+    details: ErrorMessage
+  };
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'X-API-Key': 'uqzmebqojezbivd2dmpakmj93j7gjm',
+        'X-Csrftoken': csrfToken,
+        'Cookie': `csrftoken=${csrfToken}`,
+        'Origin': 'https://sportscore.io'
+      },
+      body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const responseData = await response.json();
+    console.log('Response:', responseData);
+  } catch (error) {
+    console.error('Error:', error);
+  }
+}
+
 //get autopost is on or off
 async function fetchAutopost(social) {
   fetch(`https://sportscore.io/api/v1/autopost/settings/${social}/`, {
@@ -101,7 +152,7 @@ async function postOnFacebook(item, match) {
     console.log(post)
     console.log('end facebook post');
   } catch (error) {
-    console.error('Facebook posting error:', error);
+    await postStatus('Facebook', error)
   }
 }
 
