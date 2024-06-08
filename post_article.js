@@ -148,6 +148,8 @@ async function postOnFacebook(item, match) {
       body: JSON.stringify(fbPostObj)
     });
 
+    const SomeError = await postResp.text();
+    console.log('SomeError: ', SomeError)
     const post = await postResp.json();
     console.log(post)
     console.log('end facebook post');
