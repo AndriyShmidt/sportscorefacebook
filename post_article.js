@@ -279,6 +279,7 @@ async function getMatch(matches) {
 
 // get data from Sport Score
 function fetchData() {
+  console.log('start fetch data')
     fetch('https://sportscore.io/api/v1/football/matches/?match_status=live&sort_by_time=false&page=0', {
         method: 'GET',
         headers: {
