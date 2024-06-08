@@ -250,7 +250,9 @@ async function processItem(item, match, facebookAutopost, instagramAutopost) {
   await new Promise(resolve => setTimeout(resolve, 20000));
 
   if (facebookAutopost) {
+    console.log(facebookAutopost)
     if (Number(item.state_display) && Number(item.state_display) < 2) {
+      console.log('item ok')
       await postOnFacebook(item, match);
     }
   }
