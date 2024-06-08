@@ -247,18 +247,14 @@ async function postOnInstagram(item, match) {
 //Start post facebook and instagram
 async function processItem(item, match, facebookAutopost, instagramAutopost) {
 
-  await new Promise(resolve => setTimeout(resolve, 20000));
+  await new Promise(resolve => setTimeout(resolve, 10000));
 
   if (facebookAutopost) {
-    if (Number(item.state_display) && Number(item.state_display) < 2) {
-      await postOnFacebook(item, match);
-    }
+    await postOnFacebook(item, match);
   }
 
   if (instagramAutopost) {
-    if (Number(item.state_display) && Number(item.state_display) < 2) {
-      await postOnInstagram(item, match);
-    }
+    await postOnInstagram(item, match);
   }
 }
 
@@ -286,7 +282,7 @@ function fetchData() {
     })
     .then(response => response.json())
     .then(data => {
-      let dd = data.match_groups
+      let matches = data.match_groups
         .filter(match_group => 
           match_group.matches.some(item => Number(item.state_display) && Number(item.state_display) < 2)
         )
@@ -295,8 +291,7 @@ function fetchData() {
         matches: match_group.matches.filter(item => Number(item.state_display) && Number(item.state_display) < 2)
         }));
 
-        console.log("***************",dd)
-        getMatch(data.match_groups);
+        getMatch(matches);
     })
     .catch(error => {
         console.error('Error:', error);
