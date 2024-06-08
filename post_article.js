@@ -153,6 +153,7 @@ async function postOnFacebook(item, match) {
     console.log('end facebook post');
   } catch (error) {
     await postStatus('Facebook', error)
+    console.log(error);
   }
 }
 
@@ -248,13 +249,15 @@ async function processItem(item, match, facebookAutopost, instagramAutopost) {
 
   await new Promise(resolve => setTimeout(resolve, 20000));
 
+  console.log('facebookAutopost: ', facebookAutopost)
+
   if (facebookAutopost) {
     if (Number(item.state_display) && Number(item.state_display) < 2) {
       await postOnFacebook(item, match);
     }
   }
 
-  console.log(instagramAutopost);
+  console.log('instagramAutopost: ', instagramAutopost);
 
   if (instagramAutopost) {
     if (Number(item.state_display) && Number(item.state_display) < 2) {
