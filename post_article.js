@@ -251,6 +251,7 @@ async function processItem(item, match, facebookAutopost, instagramAutopost) {
 
   if (facebookAutopost) {
     console.log(facebookAutopost)
+    console.log(Number(item.state_display))
     if (Number(item.state_display) && Number(item.state_display) < 2) {
       console.log('item ok')
       await postOnFacebook(item, match);
