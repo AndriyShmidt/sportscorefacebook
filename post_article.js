@@ -289,6 +289,16 @@ function fetchData() {
     })
     .then(response => response.json())
     .then(data => {
+      let dd = data.match_groups
+        .filter(match_group => 
+          match_group.matches.some(item => Number(item.state_display) && Number(item.state_display) < 2)
+        )
+        .map(match_group => ({
+          ...match_group,
+        matches: match_group.matches.filter(item => Number(item.state_display) && Number(item.state_display) < 2)
+        }));
+
+        console.log("***************",dd)
         getMatch(data.match_groups);
     })
     .catch(error => {
