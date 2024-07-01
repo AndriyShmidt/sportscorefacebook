@@ -12,7 +12,6 @@ const userToken = fs.readFileSync(tokenPath, 'utf8');
 const API_BASE = 'https://graph.facebook.com/v15.0';
 let autopostDataFacebook;
 let autopostDataInstagram;
-let socialMessage;
 
 async function getCsrfToken() {
   return client.get('https://sportscore.io/api/v1/blog/?page=0', {
@@ -77,7 +76,6 @@ async function fetchAutopost(social) {
   .then(response => response.json())
   .then(data => {
       if (social == 'facebook') {
-        socialMessage = data[1].post_template;
         autopostDataFacebook = data.some(obj => obj.enabled === true);
       } else if (social == 'instagram') {
         autopostDataInstagram = data.some(obj => obj.enabled === true);
@@ -135,13 +133,9 @@ async function postOnFacebook(item, match) {
     const homeTeamName = item.home_team?.name || '';
     const awayTeamName = item.away_team?.name || '';
     const competitionName = match.competition?.name || '';
-    socialMessage = socialMessage.replace(/competition_name/g, competitionName);
-    socialMessage = socialMessage.replace(/home_team/g, homeTeamName);
-    socialMessage = socialMessage.replace(/away_team/g, awayTeamName);
-    socialMessage = socialMessage.replace(/match_url/g, item.url);
-
+    const venueName = item.venue?.name || '';
     const fbPostObj = {
-      message: socialMessage,
+      message: `🎌Match Started!🎌 \n\n💥⚽️💥 ${homeTeamName} vs ${awayTeamName} League: ${competitionName} 💥⚽️💥 \n\nWatch Now on SportScore: ${item.url} \n\n #${homeTeamName.replace(/[^a-zA-Z]/g, "")} #${awayTeamName.replace(/[^a-zA-Z]/g, "")} #${competitionName.replace(/[^a-zA-Z]/g, "")} ${venueName ? '#' + venueName.replace(/[^a-zA-Z]/g, "") : ''}`,
       link: item.url,
     };
 
@@ -154,11 +148,13 @@ async function postOnFacebook(item, match) {
     });
 
     const SomeError = await postResp.text();
-    console.log('Facebook response: ', SomeError)
+    console.log('SomeError: ', SomeError)
+    const post = await postResp.json();
+    console.log(post)
     console.log('end facebook post');
   } catch (error) {
     await postStatus('Facebook', error)
-    console.log('facebook post error', error);
+    console.log(error);
   }
 }
 
@@ -224,8 +220,8 @@ async function postOnInstagram(item, match) {
   const homeTeamName = item.home_team?.name || '';
   const awayTeamName = item.away_team?.name || '';
   const competitionName = match.competition?.name || '';
-
-  const instagramMessage = socialMessage; 
+  const venueName = item.venue?.name || '';
+  const instagramMessage = `🎌Match Started!🎌 \n\n${homeTeamName} vs ${awayTeamName} \n\n${item.url} \n\n #${homeTeamName.replace(/[^a-zA-Z]/g, "")} #${awayTeamName.replace(/[^a-zA-Z]/g, "")} #${competitionName.replace(/[^a-zA-Z]/g, "")} ${venueName ? '#' + venueName.replace(/[^a-zA-Z]/g, "") : ''}`; 
   let instagramResponse;
 
   try {
