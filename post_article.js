@@ -153,8 +153,8 @@ async function postOnFacebook(item, match) {
     console.log(post)
     console.log('end facebook post');
   } catch (error) {
-    await postStatus('Facebook', error)
     console.log(error);
+    await postStatus('Facebook', error)
   }
 }
 
