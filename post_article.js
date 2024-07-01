@@ -76,6 +76,7 @@ async function fetchAutopost(social) {
   .then(response => response.json())
   .then(data => {
       if (social == 'facebook') {
+        console.log(data);
         autopostDataFacebook = data.some(obj => obj.enabled === true);
       } else if (social == 'instagram') {
         autopostDataInstagram = data.some(obj => obj.enabled === true);
