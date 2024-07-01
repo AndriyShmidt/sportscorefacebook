@@ -289,6 +289,7 @@ function fetchData() {
           ...match_group,
         matches: match_group.matches.filter(item => Number(item.state_display) && Number(item.state_display) < 2)
         }));
+      console.log('matches: ', matches)
 
         getMatch(matches);
     })
