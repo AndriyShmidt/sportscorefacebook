@@ -156,10 +156,9 @@ async function postOnFacebook(item, match) {
 
     if (!postResp.ok) {
       const errorText = await postResp.text();
-      console.log('SomeError: ', SomeError)
       await postStatus('Facebook', errorText)
     }
-    console.log('SomeError: ', SomeError)
+    
     console.log('end facebook post');
   } catch (error) {
     console.log(error);
