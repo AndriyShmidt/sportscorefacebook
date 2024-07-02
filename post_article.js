@@ -140,16 +140,9 @@ async function postOnFacebook(item, match) {
     const awayTeamName = item.away_team?.name || '';
     const competitionName = match.competition?.name || '';
     const venueName = item.venue?.name || '';
-        
-    adminMessage = adminMessage.replace(/competition_name/g, competitionName);
-    adminMessage = adminMessage.replace(/home_team/g, homeTeamName);
-    adminMessage = adminMessage.replace(/away_team/g, awayTeamName);
-    adminMessage = adminMessage.replace(/match_url/g, item.url);
-
-    let mess = `🎌Match Started!🎌 \n\n💥⚽️💥 ${homeTeamName} vs ${awayTeamName} League: ${competitionName} 💥⚽️💥 \n\nWatch Now on SportScore: ${item.url} \n\n #${homeTeamName.replace(/[^a-zA-Z]/g, "")} #${awayTeamName.replace(/[^a-zA-Z]/g, "")} #${competitionName.replace(/[^a-zA-Z]/g, "")} ${venueName ? '#' + venueName.replace(/[^a-zA-Z]/g, "") : ''}`;
     
     const fbPostObj = {
-      message: adminMessage,
+      message: `🎌Match Started!🎌 \n\n💥⚽️💥 ${homeTeamName} vs ${awayTeamName} League: ${competitionName} 💥⚽️💥 \n\nWatch Now on SportScore: ${item.url} \n\n #${homeTeamName.replace(/[^a-zA-Z]/g, "")} #${awayTeamName.replace(/[^a-zA-Z]/g, "")} #${competitionName.replace(/[^a-zA-Z]/g, "")} ${venueName ? '#' + venueName.replace(/[^a-zA-Z]/g, "") : ''}`,
       link: item.url,
     };
 
