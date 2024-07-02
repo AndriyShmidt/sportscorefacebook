@@ -15,21 +15,25 @@ let autopostDataInstagram;
 let adminMessage;
 
 async function getCsrfToken() {
-  return client.get('https://sportscore.io/api/v1/blog/?page=0', {
-    headers: {
+  try {
+    const response = await axios.get('https://sportscore.io/api/v1/blog/?page=0', {
+      headers: {
         "accept": "application/json",
         'X-API-Key': 'uqzmebqojezbivd2dmpakmj93j7gjm',
-    },
-    }).then(response => {
-        const csrfToken = jar.getCookiesSync('https://sportscore.io').find(cookie => cookie.key === 'csrftoken')?.value;
-        console.log('CSRF Token:', csrfToken);
-        return csrfToken;
-    }).catch(error => {
-        console.error('Error:', error);
+      },
+      withCredentials: true,
     });
+
+    const cookies = response.headers['set-cookie'];
+    const csrfToken = cookies.find(cookie => cookie.includes('csrftoken')).split('csrftoken=')[1].split(';')[0];
+    console.log('CSRF Token:', csrfToken);
+    return csrfToken;
+  } catch (error) {
+    console.error('Error:', error);
+  }
 }
 
-//log error to admin panel
+// Логування помилок в адмін панель
 async function postStatus(socialMedia, ErrorMessage) {
   const url = 'https://sportscore.io/api/v1/autopost/status/';
   const csrfToken = await getCsrfToken();
@@ -157,7 +161,11 @@ async function postOnFacebook(item, match) {
       body: JSON.stringify(fbPostObj)
     });
 
-    const SomeError = await postResp.text();
+    if (!postResp.ok) {
+      const errorText = await postResp.text();
+      console.log('SomeError: ', SomeError)
+      await postStatus('Facebook', errorText)
+    }
     console.log('SomeError: ', SomeError)
     console.log('end facebook post');
   } catch (error) {
